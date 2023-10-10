@@ -1,8 +1,10 @@
+//importando a biblioteca e definindo uma aplicação tipo express
 const { application } = require('express');
 const express = require('express');
 
 const app = express();
 
+//Definindo EndPoints (Rotas)
 //Rota Principal
 app.get('/', function (request, response) {
     response.send('SHOW! A API FUNCIONA!');
