@@ -1,4 +1,5 @@
 const { stringify } = require("querystring");
+const funcoes = require('./funcoes');
 
 //dados da lista de contatos
 const listContatos = [
@@ -56,9 +57,25 @@ function searchList(req, res) {
 //funcao criar contato
 function create(req, res) {
     const nome = req.body.nome;
-    const data = req.body.data;
+    const data = new Date(req.body.data);
     const telefone = req.body.telefone;
     const email = req.body.email;
+
+    if (nome.length <5) {
+        return res.json({error:"Nome deve conter no mínimo 5 caracteres"});
+    }else if (funcoes.buscaNome(listContatos, nome)) {
+        return res.json({alert:"Nome Ja cadastrado!"});
+    }else if (isNaN(data.getTime())) {
+        return res.json({error:"Data Inválida"});
+    }else if (!funcoes.verificaCelular(telefone)) {
+        return res.json({error:"Telefone Inválido"});
+    }else if (funcoes.buscaTelefone(listContatos, telefone)) {
+        return res.json({alert:"Telefone Ja cadastrado!"});
+    }else if (!funcoes.validaEmail(email)) {
+        return res.json({error:"Email inválido"});
+    }else if (funcoes.buscaEmail(listContatos, email)) {
+        return res.json({alert:"E-mail Ja cadastrado!"});
+    }
     
     const quant = listContatos.length;
 
