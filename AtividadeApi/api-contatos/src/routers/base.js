@@ -9,7 +9,7 @@ const view = {
 
 //rotas
 router.get('/', function (req, res) {
-    return res.send(Mustache.render("<center><h1>{{title}}</h1><br>{{descricao}}<center>", view))
+    return res.send(Mustache.render("<center><h1>{{title}}</h1><br>{{descricao}}</center>", view))
 })
 
 module.exports = router;
