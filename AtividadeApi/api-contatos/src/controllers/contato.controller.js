@@ -1,5 +1,5 @@
 const { stringify } = require("querystring");
-const funcoes = require('./funcoes');
+const funcoes = require('./contato.function');
 
 //dados da lista de contatos
 const listContatos = [
@@ -50,7 +50,7 @@ function searchList(req, res) {
     }
 
     if (_cond) {
-    return res.send(`Contato #${codigo} nao foi encontrado.`)  
+    return res.json({alert:`Contato #${codigo} nao foi encontrado.`})  
     }
 }
 
@@ -103,7 +103,7 @@ function update(req, res) {
     }
 
     if (contato == undefined) {
-        return res.send(`Contato #${codigo} nao foi encontrado.`)
+        return res.json({alert: `Contato #${codigo} nao foi encontrado.`})
     }else{
         
     const nome = req.body.nome;
@@ -112,16 +112,16 @@ function update(req, res) {
     const email = req.body.email;
     
     if (nome == undefined || nome == '') {
-        return res.send(" Nome Inválido")
+        return res.json({error:"Nome Inválido"})
     } else {
         if (data == undefined || data == '') {
-            return res.send(" data Inválido")
+            return res.json({error:"Data Inválida"})
         } else {
             if (telefone == undefined || telefone == '') {
-                return res.send(" Telefone Inválido")
+                return res.json({error: "Telefone Inválido"})
             } else {
                 if (email == undefined || email == '') {
-                    return res.send(" email Inválido")
+                    return res.json({error: "Email Inválido"})
                 } else {
                     contato.nome = nome;
                     contato.data = data;
@@ -143,12 +143,12 @@ function destroy(req, res) {
         if (_contato.id == codigo){
             listContatos.splice(listContatos.indexOf(codigo),1)
             _cond = false;
-            return res.send(`o contato ${codigo} foi Excluido`);
+            return res.json({information: `o contato ${codigo} foi Excluido`});
         }        
     }
 
     if (_cond) {
-    return res.send(`Contato #${codigo} nao foi encontrado.`)  
+    return res.json({alert: `Contato #${codigo} nao foi encontrado.`})  
     }
 }
 module.exports = {list, searchList, create, update, destroy};

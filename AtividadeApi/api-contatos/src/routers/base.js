@@ -4,12 +4,12 @@ const Mustache = require('mustache');
 
 const view = {
     title: "API",
-    descricao: "Funcionando!"
+    descricao: "Bem Vindo a API de Contatos!"
 };
 
 //rotas
 router.get('/', function (req, res) {
-    return res.send(Mustache.render("<center><h1>{{title}}</h1><br>{{descricao}}</center>", view))
+    return res.send(Mustache.render("<center><h1>{{title}}</h1><br><p>{{descricao}}</p></center>", view))
 })
 
 module.exports = router;

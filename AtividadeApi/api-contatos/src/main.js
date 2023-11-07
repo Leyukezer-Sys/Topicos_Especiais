@@ -4,9 +4,10 @@ const express = require('express');
 
 const app = express();
 //importação dos arquivos de confg rotas
-const baseRouter = require('./routes/base');
-const contatoRouter = require('./routes/contato');
-const autorRouter = require('./routes/autor');
+const baseRouter = require('./routers/base');
+const contatoRouter = require('./routers/contato');
+const autorRouter = require('./routers/autor');
+const categoriaRouter = require('./routers/categoria')
 
 app.use(express.json());
 
@@ -20,6 +21,9 @@ app.use(autorRouter);
 
 //rota Contatos
 app.use(contatoRouter);
+
+//rota Categorias
+app.use(categoriaRouter);
 
 //Iniciando A Aplicação na porta 3000
 app.listen(3000, function () {
