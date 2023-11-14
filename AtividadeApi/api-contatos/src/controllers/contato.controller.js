@@ -1,154 +1,89 @@
-const { stringify } = require("querystring");
-const funcoes = require('./contato.function');
-
-//dados da lista de contatos
-const listContatos = [
-    {
-        id: 1,
-        nome: "christine Ray",
-        data: "2023-02-06",
-        telefone: "(284) 901-8328",
-        email: "mauris@protonmail.ca"
-    },
-    {
-        id: 2,
-        nome: "Eagan Hutchinson",
-        data: "2023-02-04",
-        telefone: "(892) 511-7166",
-        email: "eget.odio@icloud.org"
-    },
-    {
-        id: 3,
-        nome: "Brock Lambert",
-        data: "2023-03-09",
-        telefone: "(145) 7158-4122",
-        email: "nullam.vitae.diam@yahoo.org"
-    },
-    {
-        id: 4,
-        nome: "Craig Vinson",
-        data: "2024-06-21",
-        telefone: "(437) 598-0259",
-        email: "nunc.sed@google.ca"
-    }
-];
+const validacoes = require('validatorjs');
+const funcoes = require('./contato.functions');
+const connection = require('../configs/mysql.config');
 
 //funcao lista
 function list(req, res) {
-    return res.json(listContatos);
+    connection.query('SELECT * FROM contatos', function (err, result) {
+        if(err){
+            return res.json({erro: 'Ocorreram erros ao buscar os dados'});
+        }
+        return res.json(result);
+    });
 }
 
 function searchList(req, res) {
     let codigo = req.params.codigo;
-    let _cond = true;   
-
-    for (const _contato of listContatos) {
-        if (_contato.id == codigo){
-            _cond = false;
-            return res.json(_contato);
-        }        
-    }
-
-    if (_cond) {
-    return res.json({alert:`Contato #${codigo} nao foi encontrado.`})  
-    }
+    connection.query('SELECT * FROM contatos WHERE id = ?',[codigo], function (err, result) {
+        if(err){
+            return res.json({erro: 'Ocorreram erros ao buscar contato'});
+        }
+        return res.json(result);
+    });
 }
 
 //funcao criar contato
 function create(req, res) {
-    const nome = req.body.nome;
-    const data = new Date(req.body.data);
-    const telefone = req.body.telefone;
-    const email = req.body.email;
+    const {nome, data, telefone, email} = req.body;
 
-    if (nome.length <5) {
-        return res.json({error:"Nome deve conter no mínimo 5 caracteres"});
-    }else if (funcoes.buscaNome(listContatos, nome)) {
-        return res.json({alert:"Nome Ja cadastrado!"});
-    }else if (isNaN(data.getTime())) {
-        return res.json({error:"Data Inválida"});
-    }else if (!funcoes.verificaCelular(telefone)) {
-        return res.json({error:"Telefone Inválido"});
-    }else if (funcoes.buscaTelefone(listContatos, telefone)) {
-        return res.json({alert:"Telefone Ja cadastrado!"});
-    }else if (!funcoes.validaEmail(email)) {
-        return res.json({error:"Email inválido"});
-    }else if (funcoes.buscaEmail(listContatos, email)) {
-        return res.json({alert:"E-mail Ja cadastrado!"});
+    let regras = {
+        nome: 'required|min:5',
+        data: 'required|date',
+        telefone: ['required', 'regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/'],
+        email: 'required|email'
+    };
+
+    let validacao = new validacoes(req.body, regras);
+
+    if (validacao.fails()) {
+        return res.json(validacao.errors);
+    }else
+    {
+        connection.query('INSERT INTO contatos VALUES (NULL,?,?,?,?);',[nome,data,telefone,email], function (err, result) {
+            if (err) {
+                return res.json({erro: err.message})
+            }
+            if(result.affectedRows == 0){
+                return res.json({erro: 'Falha ao tentar Cadastrar'});
+            }else return res.json({id: result.insertId, nome, data, telefone, email});
+        });
     }
-    
-    const quant = listContatos.length;
-
-    const novoContato = {
-        id: quant + 1,
-        nome: nome,
-        data: data,
-        telefone: telefone,
-        email: email
-    }
-
-    listContatos.push(novoContato);
-    return res.json(listContatos); 
 }
 
 function update(req, res) {
     const codigo = req.params.codigo;
+    const {nome, data, telefone, email} = req.body;
+    let regras = {
+        nome: 'required|min:5',
+        data: 'required|date',
+        telefone: ['required','regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/'],
+        email: 'required|email'
+    };
 
-    let contato = null;
+    let validacao = new validacoes(req.body, regras);
 
-    for (const _contato of listContatos) {
-        if (_contato.id == codigo){
-            contato = _contato;
-        }        
-    }
-
-    if (contato == undefined) {
-        return res.json({alert: `Contato #${codigo} nao foi encontrado.`})
-    }else{
-        
-    const nome = req.body.nome;
-    const data = req.body.data;
-    const telefone = req.body.telefone;
-    const email = req.body.email;
-    
-    if (nome == undefined || nome == '') {
-        return res.json({error:"Nome Inválido"})
-    } else {
-        if (data == undefined || data == '') {
-            return res.json({error:"Data Inválida"})
-        } else {
-            if (telefone == undefined || telefone == '') {
-                return res.json({error: "Telefone Inválido"})
-            } else {
-                if (email == undefined || email == '') {
-                    return res.json({error: "Email Inválido"})
-                } else {
-                    contato.nome = nome;
-                    contato.data = data;
-                    contato.telefone = telefone;    
-                    contato.email = email; 
-                } 
+    if (validacao.fails()) {
+        return res.json(validacao.errors)
+    }else
+    {
+        connection.query('UPDATE contatos SET nome = ?, data_nascimento = ?, telefone = ?, email = ? WHERE id = ?;',[nome,data,telefone,email, codigo], function (err, result) {
+            if (err) {
+                return res.json({erro: err.message})
             }
-        }   
-    }
-        return res.json(contato);
+            if(result.affectedRows == 0){
+                return res.json({erro: 'Falha ao tentar Atualizar'});
+            }else return res.json({nome, data, telefone, email});
+        });
     }
 }
 
 function destroy(req, res) {
     const codigo = req.params.codigo;
-    let _cond = true;
-
-    for (const _contato of listContatos) {
-        if (_contato.id == codigo){
-            listContatos.splice(listContatos.indexOf(codigo),1)
-            _cond = false;
-            return res.json({information: `o contato ${codigo} foi Excluido`});
-        }        
-    }
-
-    if (_cond) {
-    return res.json({alert: `Contato #${codigo} nao foi encontrado.`})  
-    }
+    connection.query('DELETE FROM contatos WHERE id = ?;',[codigo], function (err, result) {
+        if (err) {
+            return res.json({erro: err.message})
+        }
+        return res.json({information: 'Excluido com sucesso!'})
+    })
 }
 module.exports = {list, searchList, create, update, destroy};
