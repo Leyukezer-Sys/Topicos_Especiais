@@ -1,24 +1,47 @@
-const listCategoria = []
-
-function list(req, res){
-    return res.json(listCategoria)
+const validacoes = require('validatorjs');
+//funcao lista
+function list(req, res) {
+    connection.query('SELECT * FROM categorias', function (err, result) {
+        if(err){
+            return res.json({erro: 'Ocorreram erros ao buscar os dados'});
+        }
+        return res.json(result);
+    });
 }
 
-function searchList(req, res) {
-    let codigo = req.params.codigo;
-    let _cond = true;   
+//funcao criar categoria
+function create(req, res) {
+    const {nome, descricao} = req.body;
 
-    for (const _categoria of listCategoria) {
-        if (_categoria.id == codigo){
-            _cond = false;
-            return res.json(_categoria);
-        }        
-    }
+    let regras = {
+        nome: 'required|min:4'
+    };
 
-    if (_cond) {
-    return res.json({alert:`Contato #${codigo} nao foi encontrado.`})  
+    let validacao = new validacoes(req.body, regras);
+
+    if (validacao.fails()) {
+        return res.json(validacao.errors);
+    }else
+    {
+        connection.query('INSERT INTO categorias VALUES (NULL,?,?);',[nome,descricao], function (err, result) {
+            if (err) {
+                return res.json({erro: err.message})
+            }
+            if(result.affectedRows == 0){
+                return res.json({erro: 'Falha ao tentar Cadastrar'});
+            }else return res.json({id: result.insertId, nome, descricao});
+        });
     }
 }
 
+function destroy(req, res) {
+    const codigo = req.params.codigo;
+    connection.query('DELETE FROM categorias WHERE id = ?;',[codigo], function (err, result) {
+        if (err) {
+            return res.json({erro: err.message})
+        }
+        return res.json({information: 'Excluido com sucesso!'})
+    })
+}
 
-module.exports = {list};
+module.exports = {list, create, destroy};
