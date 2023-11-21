@@ -4,7 +4,7 @@ const connection = require('../configs/mysql.config');
 
 //funcao lista
 function list(req, res) {
-    connection.query('SELECT * FROM contatos', function (err, result) {
+    connection.query('SELECT C.*, CA.nome categoria FROM contatos C, categorias CA WHERE c.id_categoria_fk = CA.id', function (err, result) {
         if(err){
             return res.json({erro: 'Ocorreram erros ao buscar os dados'});
         }
@@ -14,7 +14,7 @@ function list(req, res) {
 
 function searchList(req, res) {
     let codigo = req.params.codigo;
-    connection.query('SELECT * FROM contatos WHERE id = ?',[codigo], function (err, result) {
+    connection.query('SELECT C.*, CA.nome categoria FROM contatos C, categorias CA WHERE c.id_categoria_fk = CA.id AND id = ?',[codigo], function (err, result) {
         if(err){
             return res.json({erro: 'Ocorreram erros ao buscar contato'});
         }
@@ -24,49 +24,49 @@ function searchList(req, res) {
 
 //funcao criar contato
 function create(req, res) {
-    const {nome, data, telefone, email} = req.body;
 
     let regras = {
         nome: 'required|min:5',
         data: 'required|date',
         telefone: ['required', 'regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/'],
-        email: 'required|email'
+        email: 'required|email',
+        categoria: 'required|integer'
     };
 
     let validacao = new validacoes(req.body, regras);
 
     if (validacao.fails()) {
         return res.json(validacao.errors);
-    }else
-    {
-        connection.query('INSERT INTO contatos VALUES (NULL,?,?,?,?);',[nome,data,telefone,email], function (err, result) {
+    }
+        const {nome, data, telefone, email, categoria} = req.body;
+        connection.query('INSERT INTO contatos VALUES (NULL,?,?,?,?,?);',[nome,data,telefone,email,categoria], function (err, result) {
             if (err) {
                 return res.json({erro: err.message})
             }
             if(result.affectedRows == 0){
                 return res.json({erro: 'Falha ao tentar Cadastrar'});
-            }else return res.json({id: result.insertId, nome, data, telefone, email});
+            }else return res.json({id: result.insertId, nome, data, telefone, email, categoria});
         });
-    }
 }
 
 function update(req, res) {
-    const codigo = req.params.codigo;
-    const {nome, data, telefone, email} = req.body;
     let regras = {
         nome: 'required|min:5',
         data: 'required|date',
         telefone: ['required','regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/'],
-        email: 'required|email'
+        email: 'required|email',
+        categoria: 'integer'
     };
 
     let validacao = new validacoes(req.body, regras);
 
     if (validacao.fails()) {
         return res.json(validacao.errors)
-    }else
-    {
-        connection.query('UPDATE contatos SET nome = ?, data_nascimento = ?, telefone = ?, email = ? WHERE id = ?;',[nome,data,telefone,email, codigo], function (err, result) {
+    }
+    const codigo = req.params.codigo;
+    const {nome, data, telefone, email, categoria} = req.body;
+    
+        connection.query('UPDATE contatos SET nome = ?, data_nascimento = ?, telefone = ?, email = ?, id_categoria_fk = ? WHERE id = ?;',[nome,data,telefone,email,categoria, codigo], function (err, result) {
             if (err) {
                 return res.json({erro: err.message})
             }
@@ -74,7 +74,6 @@ function update(req, res) {
                 return res.json({erro: 'Falha ao tentar Atualizar'});
             }else return res.json({nome, data, telefone, email});
         });
-    }
 }
 
 function destroy(req, res) {
