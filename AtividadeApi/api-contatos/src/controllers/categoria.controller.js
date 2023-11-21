@@ -1,4 +1,5 @@
 const validacoes = require('validatorjs');
+const connection = require('../configs/mysql.config');
 //funcao lista
 function list(req, res) {
     connection.query('SELECT * FROM categorias', function (err, result) {
@@ -34,6 +35,31 @@ function create(req, res) {
     }
 }
 
+//atualizar uma categoria
+function update(req, res) {
+    const codigo = req.params.codigo;
+    const {nome, descricao} = req.body;
+    let regras = {
+        nome: 'required|min:4'
+    };
+
+    let validacao = new validacoes(req.body, regras);
+
+    if (validacao.fails()) {
+        return res.json(validacao.errors)
+    }else
+    {
+        connection.query('UPDATE categorias SET nome = ?, descricao = ? WHERE id = ?;',[nome, descricao, codigo], function (err, result) {
+            if (err) {
+                return res.json({erro: err.message})
+            }
+            if(result.affectedRows == 0){
+                return res.json({erro: 'Falha ao tentar Atualizar'});
+            }else return res.json({nome, descricao});
+        });
+    }
+}
+
 function destroy(req, res) {
     const codigo = req.params.codigo;
     connection.query('DELETE FROM categorias WHERE id = ?;',[codigo], function (err, result) {
@@ -44,4 +70,4 @@ function destroy(req, res) {
     })
 }
 
-module.exports = {list, create, destroy};
+module.exports = {list, create, update, destroy};
