@@ -15,7 +15,7 @@ function create(req, res) {
         rg : 'required|min:4',
         sexo : 'required|max:1',
         data_nasc : 'required|date',
-        renda : 'required|double',
+        renda : 'required',
         endereco : 'required|min:4',
         email : 'required|email',
         telefone :['required', 'regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/']
@@ -43,7 +43,7 @@ function update(req, res){
         rg : 'required|min:4',
         sexo : 'required|max:1',
         data_nasc : 'required|date',
-        renda : 'required|double',
+        renda : 'required',
         endereco : 'required|min:4',
         email : 'required|email',
         telefone :['required', 'regex:/^\\(\\d{2}\\)\\s?\\d\\d{4}\\-\\d{4}$/']

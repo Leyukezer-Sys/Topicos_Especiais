@@ -12,7 +12,7 @@ function list(req, res) {
 function create(req,res){
     regras = {
         valor :'required|double',
-        data_hora :'required|datetime',
+        data_hora :'required|date',
         conta_id :'required|numeric',
     }
 
