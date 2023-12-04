@@ -14,8 +14,8 @@ function create(req,res){
         valor: 'required|double',
         data_hora: 'required|datetime',
         descricao: 'required|min:4',
-        conta_origem_id : 'required|integer',
-        conta_destino_id: 'required|integer',
+        conta_origem_id : 'required|numeric',
+        conta_destino_id: 'required|numeric',
     }
 
     let teste = new validacao(req.body, regras);
@@ -24,23 +24,32 @@ function create(req,res){
 
     const {valor, data, descricao, conta_origem, conta_destino} = req.body;
 
-    connection.query('UPDATE conta SET saldo = saldo - ? WHERE id_con = ?;', {valor, conta_origem}, function (err, result) {
+    connection.query('UPDATE conta SET saldo = saldo - ? WHERE id_con = ?;', [valor, conta_origem], function (err, result) {
         if (err) return res.json(err.message);
         if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta Origem..."})
         res.json({conta_origem: {conta_origem}}); 
      });
 
-     connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', {valor, conta_destino}, function (err, result) {
+     connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', [valor, conta_destino], function (err, result) {
         if (err) return res.json(err.message);
         if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta Destino..."})
         res.json({conta_destino: {conta_destino}}); 
      });
 
-    connection.query('INSERT INTO transferencia VALUES ( NULL, ?, ?, ?, ?, ?);', {valor, data, descricao, conta_origem,conta_destino}, function(err, result) {
+    connection.query('INSERT INTO transferencia VALUES ( NULL, ?, ?, ?, ?, ?);', [valor, data, descricao, conta_origem,conta_destino], function(err, result) {
         if(err) return res.json(err.message);
         if(result.affectedRows == 0) return res.json({erro: "nao foi possivel inserir uma Transferencia."});
         return res.json({deposito: {id:result.insertId, data, descricao, valor}});
     });
 }
 
-module.exports = { list };
+function destroy(req,res){
+    const id_tra = req.params.codigo;
+    connection.query('DELETE FROM transferencia WHERE id_tra = ?;', [id_tra], function(err, result) {
+        if(err) return res.json(err.message);
+        if(result.affectedRows == 0) return res.json({erro: "nao foi possivel excluir a Transferencia."});
+        return res.json({sucess: "Transferencia excluida"});
+    });
+}
+
+module.exports = { list, create, destroy };

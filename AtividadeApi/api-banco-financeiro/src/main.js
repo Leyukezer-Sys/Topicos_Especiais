@@ -28,5 +28,5 @@ const transferenciaRouter = require('./routes/transferencia.route');
 app.use(transferenciaRouter);
 
 app.listen(8080, function () {
-    console.log('API FUNCIONANDO NA PORTA 8080...')
+    console.log('API FUNCIONANDO NA PORTA 8080...');
 });

@@ -12,8 +12,8 @@ function list(req, res) {
 function create(req,res){
     regra = {
         valor :'required|double',
-        data_hora :'required|datetime',
-        conta_id :'required|integer'
+        data :'required|date',
+        conta_id :'required'
     }
 
     let teste = new validacao(req.body, regra);
@@ -22,18 +22,26 @@ function create(req,res){
 
     const {valor, data, conta_id} = req.body;
     
-    connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', {valor, conta_id}, function (err, result) {
+    connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', [valor, conta_id], function (err, result) {
         if (err) return res.json(err.message);
         if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta..."})
         res.json({conta: {conta_id}}); 
      });
 
-    connection.query('INSERT INTO deposito VALUES ( NULL, ?, ?, ?);', {valor, data, conta_id}, function(err, result) {
+    connection.query('INSERT INTO deposito VALUES ( NULL, ?, ?, ?);', [valor, data, conta_id], function(err, result) {
         if(err) return res.json(err.message);
         if(result.affectedRows == 0) return res.json({erro: "nao foi possivel inserir um deposito."});
         return res.json({deposito: {id:result.insertId, data, valor, conta_id}});
     });
 
 }
+function destroy(req,res){
+    const id_dep = req.params.codigo;
+    connection.query('DELETE FROM deposito WHERE id_dep = ?;', [id_dep], function(err, result) {
+        if(err) return res.json(err.message);
+        if(result.affectedRows == 0) return res.json({erro: "nao foi possivel excluir o deposito."});
+        return res.json({sucesso:" Deposito excluido!"});
+    });
+}
 
-module.exports = { list };
+module.exports = { list, create, destroy };

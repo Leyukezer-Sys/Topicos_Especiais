@@ -9,28 +9,65 @@ function list(req, res) {
     });
 }
 
-function create(req,res){
+function create(req, res) {
     const regra = {
-        nome_fantasia : 'required|min:4',
+        nome_fantasia: 'required|min:4',
         razao_social: 'required|min:4',
-        cnpj : 'required|min:14|max:18',
-        numero :'required|min:1|max:3|integer'
+        cnpj: 'required|min:14|max:18',
+        numero: 'required|min:1|max:3|numeric'
     }
 
     let teste = new validacao(req.body, regra);
 
-    if (teste.fails()) return res.json(teste.errors); 
+    if (teste.fails()) return res.json(teste.errors);
 
-    const {nome, razao_social, cnpj, numero} = req.body;
+    const { nome_fantasia, razao_social, cnpj, numero } = req.body;
 
-    connection.query('INSERT INTO banco VALUES (NULL, ?, ?, ?, ?);',{nome, razao_social, cnpj, numero}, function (err, result) {
+    connection.query('INSERT INTO banco VALUES (NULL,?,?,?,?)', [nome_fantasia, razao_social, cnpj, numero], function (err, result) {
 
         if (err) return res.json(err.message);
 
-        if (result.affectedRows == 0) return res.json({erro: "ocorreu um erro ao inserir o novo banco."});
+        if (result.affectedRows == 0) return res.json({ erro: "ocorreu um erro ao inserir o novo banco." });
 
-        return res.json({id:result.insertId, nome, razao_social, cnpj, numero});
+        return res.json({ id: result.insertId, nome_fantasia, razao_social, cnpj, numero });
     });
 }
 
-module.exports = { list };
+function update(req, res){
+    const regra = {
+        nome_fantasia: 'required|min:4',
+        razao_social: 'required|min:4',
+        cnpj: 'required|min:14|max:18',
+        numero: 'required|min:1|max:3|numeric'
+    }
+
+    let teste = new validacao(req.body, regra);
+
+    if (teste.fails()) return res.json(teste.errors);
+
+    const id_ban = req.params.codigo;
+    const { nome_fantasia, razao_social, cnpj, numero } = req.body;
+
+    connection.query('UPDATE banco SET nome_fantasia = ?, razao_social = ?, cnpj = ?, numero = ? WHERE id_ban = ?', [nome_fantasia, razao_social, cnpj, numero, id_ban], function (err, result) {
+
+        if (err) return res.json(err.message);
+
+        if (result.affectedRows == 0) return res.json({ erro: "ocorreu um erro ao atualizar o banco." });
+
+        return res.json({ id: result.insertId, nome_fantasia, razao_social, cnpj, numero });
+    });
+}
+
+function destroy(req,res){
+    const id_ban = req.params.codigo;
+    connection.query('DELETE FROM banco WHERE id_ban = ?;', [id_ban], function (err, result) {
+
+        if (err) return res.json(err.message);
+
+        if (result.affectedRows == 0) return res.json({ erro: "ocorreu um erro ao Excluir o banco." });
+
+        return res.json({ sucess:"Banco excluido" });
+    });
+}
+
+module.exports = { list, create, update, destroy};
