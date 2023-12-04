@@ -24,7 +24,7 @@ app.use(depositoRouter);
 const saqueRouter = require('./routes/saque.router');
 app.use(saqueRouter);
 
-const transferenciaRouter = require('./routes/transferencia.route');
+const transferenciaRouter = require('./routes/transferencia.router');
 app.use(transferenciaRouter);
 
 app.listen(8080, function () {

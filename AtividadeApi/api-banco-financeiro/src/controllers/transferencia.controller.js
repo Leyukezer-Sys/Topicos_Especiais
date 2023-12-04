@@ -11,8 +11,8 @@ function list(req, res) {
 
 function create(req,res){
     regras= {
-        valor: 'required|double',
-        data_hora: 'required|datetime',
+        valor: 'required',
+        data_hora: 'required|date',
         descricao: 'required|min:4',
         conta_origem_id : 'required|numeric',
         conta_destino_id: 'required|numeric',
@@ -50,6 +50,7 @@ function destroy(req,res){
         if(result.affectedRows == 0) return res.json({erro: "nao foi possivel excluir a Transferencia."});
         return res.json({sucess: "Transferencia excluida"});
     });
+    
 }
 
 module.exports = { list, create, destroy };

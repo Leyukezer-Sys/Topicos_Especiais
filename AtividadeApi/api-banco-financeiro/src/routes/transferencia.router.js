@@ -7,6 +7,6 @@ router.get('/transferencias', controllerTransferencia.list);
 
 router.post('/transferencia', controllerTransferencia.create);
 
-router.delete('/transferencia/:codigo', controllerTransferencia.delete);
+router.delete('/transferencia/:codigo', controllerTransferencia.destroy);
 
 module.exports = router;

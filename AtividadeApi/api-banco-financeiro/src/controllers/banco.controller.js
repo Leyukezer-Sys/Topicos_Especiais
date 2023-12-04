@@ -59,6 +59,7 @@ function update(req, res){
 }
 
 function destroy(req,res){
+    
     const id_ban = req.params.codigo;
     connection.query('DELETE FROM banco WHERE id_ban = ?;', [id_ban], function (err, result) {
 
