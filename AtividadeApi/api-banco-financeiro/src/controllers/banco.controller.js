@@ -14,7 +14,7 @@ function create(req, res) {
         nome_fantasia: 'required|min:4',
         razao_social: 'required|min:4',
         cnpj: 'required|min:14|max:18',
-        numero: 'required|min:1|max:3|numeric'
+        numero: 'required|min:1|numeric'
     }
 
     let teste = new validacao(req.body, regra);
@@ -38,7 +38,7 @@ function update(req, res){
         nome_fantasia: 'required|min:4',
         razao_social: 'required|min:4',
         cnpj: 'required|min:14|max:18',
-        numero: 'required|min:1|max:3|numeric'
+        numero: 'required|min:1'
     }
 
     let teste = new validacao(req.body, regra);
@@ -54,7 +54,7 @@ function update(req, res){
 
         if (result.affectedRows == 0) return res.json({ erro: "ocorreu um erro ao atualizar o banco." });
 
-        return res.json({ id: result.insertId, nome_fantasia, razao_social, cnpj, numero });
+        return res.json({ id: id_ban, nome_fantasia, razao_social, cnpj, numero });
     });
 }
 

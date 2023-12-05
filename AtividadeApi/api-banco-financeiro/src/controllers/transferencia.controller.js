@@ -24,16 +24,14 @@ function create(req,res){
 
     const {valor, data, descricao, conta_origem, conta_destino} = req.body;
 
-    connection.query('UPDATE conta SET saldo = saldo - ? WHERE id_con = ?;', [valor, conta_origem], function (err, result) {
+    connection.query('UPDATE conta SET saldo = saldo - ? WHERE id_con = ?', [valor, conta_origem], function (err, result) {
         if (err) return res.json(err.message);
         if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta Origem..."})
-        res.json({conta_origem: {conta_origem}}); 
      });
 
      connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', [valor, conta_destino], function (err, result) {
         if (err) return res.json(err.message);
         if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta Destino..."})
-        res.json({conta_destino: {conta_destino}}); 
      });
 
     connection.query('INSERT INTO transferencia VALUES ( NULL, ?, ?, ?, ?, ?);', [valor, data, descricao, conta_origem,conta_destino], function(err, result) {

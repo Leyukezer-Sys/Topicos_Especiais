@@ -11,7 +11,7 @@ function list(req, res) {
 
 function create(req,res){
     regra = {
-        valor :'required|double',
+        valor :'required',
         data :'required|date',
         conta_id :'required'
     }
@@ -24,8 +24,7 @@ function create(req,res){
     
     connection.query('UPDATE conta SET saldo = saldo + ? WHERE id_con = ?;', [valor, conta_id], function (err, result) {
         if (err) return res.json(err.message);
-        if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta..."})
-        res.json({conta: {conta_id}}); 
+        if (result.affectedRows == 0) return res.json({erro: "nao foi possivel atualizar o saldo da conta..."});
      });
 
     connection.query('INSERT INTO deposito VALUES ( NULL, ?, ?, ?);', [valor, data, conta_id], function(err, result) {
